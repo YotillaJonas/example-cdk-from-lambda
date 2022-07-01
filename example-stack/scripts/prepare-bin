@@ -1,6 +1,10 @@
 #!/bin/bash
 set -e
 
+realpath() {
+    [[ $1 = /* ]] && echo "$1" || echo "$PWD/${1#./}"
+}
+
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 PROJECT_DIR=$(realpath "${SCRIPT_DIR}/..")
 DOCKER_IMAGE_TAG=aws-cdk-bin:latest
@@ -8,8 +12,8 @@ TMP_BIN_DIR="${PROJECT_DIR}/tmp"
 
 mkdir -p ${TMP_BIN_DIR}
 
-mvn package -f "${PROJECT_DIR}/run-cdk-lambda/pom.xml"
-cp ${PROJECT_DIR}/run-cdk-lambda/target/run-cdk-lambda-*.jar ${TMP_BIN_DIR}/run-cdk-lambda.jar
+mvn package -f "${PROJECT_DIR}/../run-cdk-lambda/pom.xml"
+cp ${PROJECT_DIR}/../run-cdk-lambda/target/run-cdk-lambda-*.jar ${TMP_BIN_DIR}/run-cdk-lambda.jar
 
 docker build -t ${DOCKER_IMAGE_TAG} ${PROJECT_DIR}/docker/cdk
 

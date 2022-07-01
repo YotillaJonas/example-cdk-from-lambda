@@ -7,58 +7,42 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Map;
-import java.util.Optional;
+import java.util.Random;
 import java.util.stream.Collectors;
 
-public class CdkWrapper implements RequestHandler<Map<String, String>, String> {
+public class CreateTenant implements RequestHandler<Map<String, String>, String> {
 
     public static final String CDK_OUT_DIR = "/tmp/cdk.out";
     private static final String CDK_COMMAND = "java -cp . ";
 
-    private static final String DEPLOY_OPERATION = "deploy";
-    private static final String DESTROY_OPERATION = "destroy";
-
-    protected static final String DEFAULT_TENANT_ID = "0";
     protected static final String TENANT_ID_PARAMETER_KEY = "tenantId";
+    protected static final String REGION_PARAMETER_KEY = "region";
+    protected static final String VERSION_LABEL_PARAMETER_KEY = "versionLabel";
+    private static final Random RANDOM = new Random();
 
     @Override
     public String handleRequest(Map<String, String> input, Context context) {
-        final String operation = input.get("operation");
-        final String tenantId = Optional.ofNullable(input.get(TENANT_ID_PARAMETER_KEY)).orElse(DEFAULT_TENANT_ID);
+        final String region = input.get(REGION_PARAMETER_KEY);
+        final String versionLabel = input.get(VERSION_LABEL_PARAMETER_KEY);
+        final int tenantId = RANDOM.nextInt();
 
-        if (DEPLOY_OPERATION.equalsIgnoreCase(operation)) {
-            deployApp(RunCdkLambdaApp.class, tenantId);
-        } else if (DESTROY_OPERATION.equalsIgnoreCase(operation)) {
-            destroyApp(RunCdkLambdaApp.class, tenantId);
-        }
+        createNewTenant(RunCdkLambdaApp.class, region, versionLabel, tenantId);
 
-        return "";
+        return String.valueOf(tenantId);
     }
 
-    public static void deployApp(Class<?> cdkClass, final String tenantId) {
+    public static void createNewTenant(Class<?> cdkClass, final String region, final String versionLabel, final int tenantId) {
         ProcessBuilder processBuilder = new ProcessBuilder(
                 "cdk",
-                DEPLOY_OPERATION,
+                "deploy",
                 "--verbose",
                 "--output", CDK_OUT_DIR,
                 "--app", CDK_COMMAND + cdkClass.getName(),
                 "--context", TENANT_ID_PARAMETER_KEY + "=" + tenantId,
+                "--context", REGION_PARAMETER_KEY + "=" + region,
+                "--context", VERSION_LABEL_PARAMETER_KEY + "=" + versionLabel,
                 "--require-approval", "\"never\""
         );
-        executeProcess(processBuilder);
-    }
-
-    public static void destroyApp(Class<?> cdkClass, final String tenantId) {
-        ProcessBuilder processBuilder = new ProcessBuilder(
-                "cdk",
-                DESTROY_OPERATION,
-                "--verbose",
-                "--output", CDK_OUT_DIR,
-                "--app", CDK_COMMAND + cdkClass.getName(),
-                "--context", TENANT_ID_PARAMETER_KEY + "=" + tenantId,
-                "--force"
-        );
-
         executeProcess(processBuilder);
     }
 

@@ -3,13 +3,19 @@
          xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.myorg</groupId>
+    <parent>
+        <groupId>com.myorg</groupId>
+        <artifactId>example-cdk-from-lambda</artifactId>
+        <version>0.1</version>
+    </parent>
+
     <artifactId>run-cdk-lambda</artifactId>
     <version>0.1</version>
+    <packaging>jar</packaging>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <cdk.version>1.71.0</cdk.version>
+        <cdk.version>2.26.0</cdk.version>
         <junit.version>5.7.0</junit.version>
     </properties>
 
@@ -52,15 +58,9 @@
     <dependencies>
         <dependency>
             <groupId>software.amazon.awscdk</groupId>
-            <artifactId>core</artifactId>
+            <artifactId>aws-cdk-lib</artifactId>
             <version>${cdk.version}</version>
         </dependency>
-        <dependency>
-            <groupId>software.amazon.awscdk</groupId>
-            <artifactId>s3</artifactId>
-            <version>${cdk.version}</version>
-        </dependency>
-
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-lambda-java-core</artifactId>
